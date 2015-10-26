@@ -1,0 +1,23 @@
+Quick Guide to XML Validation and Querying
+
+XML Validation
+
+In the XML data demos, we use the xmllint tool to validate XML documents against DTDs and XML Schema definitions. It's pre-installed on many systems, but if you find that typing "xmllint" on the command line gives you an error, you can download it as part of the free, open-source libxml2 package. Here are some examples of using the xmllint command. In all cases, the parameter --noout suppresses the input XML from being echoed along with the answer.
+
+To validate XML data with a DTD stored in the same file:
+  xmllint --valid --noout DataFileWithDTD.xml
+
+To validate XML data against a separately stored DTD:
+  xmllint --dtdvalid DTD.dtd --noout DataFileWithoutDTD.xml
+
+To validate XML data against a separately stored XML Schema definition:
+  xmllint --schema XMLSchemaFile.xsd --noout DataFile.xml
+
+Alternatively, you can use online services to validate XML: for instance, the W3C Markup Validation Service for DTDs, and the XML for ASP.NET Schema Validator for XML Schema.
+
+
+XML Querying
+
+A popular processor for XPath/XQuery and XSLT is Saxon. Since Saxon only supports command-line and Java/.NET APIs, for our demos we use the Kernow tool, which provides a convenient interface for working with XML queries. Kernow incorporates Saxon for its query processing, so with Kernow you'll be all set to experiment with XML querying. The quickest way to get started with Kernow is to download the .zip file for Kernow 1.6.1. Unzip its contents to a folder of your choice, then double-click the kernow.jar file to run. You'll be most interested in the XQuery and XSLT Sandbox tabs. (The XML Schema Sandbox/Validation tabs can do XML Schema validation, but Kernow does not support DTD validation as far as we could find.)
+
+The XQuery Sandbox supports both XPath and XQuery, since XPath is part of XQuery. When running XPath/XQuery, if you don't want to specify the full path to an XML file (like "~/IntroToDatabases/XML/Bookstore.xml"), you can copy the file into the same folder with the Kernow executable and refer to it by name only ("Bookstore.xml"). The XSLT Sandbox takes an XML document in the left pane, transforms it according to the XSL stylesheet in the right pane, and outputs the result at the bottom of the window.

@@ -1,0 +1,341 @@
+<!-- XSLT Demo -->
+
+<!--*****************************************************************
+     BASIC TEMPLATE MATCHING
+     List of book and magazine titles
+	 
+	 the return of the XSLT is a XML
+******************************************************************-->
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="xml" indent="yes" omit-xml-declaration="yes" />
+
+<xsl:template match="Book">
+  <BookTitle> <xsl:value-of select="Title" /> </BookTitle>
+</xsl:template>
+
+<xsl:template match="Magazine">
+  <MagazineTitle> <xsl:value-of select="Title" /> </MagazineTitle>
+</xsl:template>
+
+</xsl:stylesheet>
+
+<!--*****************************************************************
+     SIMPLE XPATH, COPY-OF
+     All books costing less than $90
+     Note unwanted concatentated text
+	 
+	 &lt means less than and . means current element
+	 
+	 when you have elements in your database that are not matched by any template, what 
+	 XSLT will do is actually return the concatenation of the string leaf or text leaf values of 
+	 those elements
+******************************************************************-->
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="xml" indent="yes" omit-xml-declaration="yes" />
+
+<xsl:template match="Book[@Price &lt; 90]">
+   <xsl:copy-of select="." />
+</xsl:template>
+
+</xsl:stylesheet>
+
+<!--*****************************************************************
+     NULL TEMPLATE
+     All books costing less than $90, without extra text
+	 
+	 to fix the problem mentioned above
+	 
+	 when a portion of data is matched by a templated the template says what to do
+	 we can replace, remove, or just copy the data
+******************************************************************-->
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="xml" indent="yes" omit-xml-declaration="yes" />
+
+<xsl:template match="Book[@Price &lt; 90]">
+   <xsl:copy-of select="." />
+</xsl:template>
+
+<xsl:template match="text()" />
+
+</xsl:stylesheet>
+
+<!--*****************************************************************
+     TEMPLATE-MATCHING AMBIGUITY
+     Discard books, but also copy books and magazines
+	 
+	 if two templates that both match and we get ambiguity warning, the machine 
+	 choose second of the matching transformations.
+	 but if one is more specific, it is considered the higher priority template, regardless of 
+	 the order
+******************************************************************-->
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="xml" indent="yes" omit-xml-declaration="yes" />
+
+<xsl:template match="Book" />
+
+<xsl:template match="Book">
+   <xsl:copy-of select="." />
+</xsl:template>
+
+<xsl:template match="Magazine">
+   <xsl:copy-of select="." />
+</xsl:template>
+
+</xsl:stylesheet>
+
+<!--*****************************************************************
+     TEMPLATE-MATCHING AMBIGUITY
+     Swap order of Book templates
+******************************************************************-->
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="xml" indent="yes" omit-xml-declaration="yes" />
+
+<xsl:template match="Book">
+   <xsl:copy-of select="." />
+</xsl:template>
+
+<xsl:template match="Book" />
+
+<xsl:template match="Magazine">
+   <xsl:copy-of select="." />
+</xsl:template>
+
+</xsl:stylesheet>
+
+<!--*****************************************************************
+     TEMPLATE-MATCHING AMBIGUITY
+     Copy inexpensive books and discard others
+******************************************************************-->
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="xml" indent="yes" omit-xml-declaration="yes" />
+
+<xsl:template match="Book[@Price &lt; 90]">
+   <xsl:copy-of select="." />
+</xsl:template>
+
+<xsl:template match="Book" />
+
+<xsl:template match="Magazine">
+   <xsl:copy-of select="." />
+</xsl:template>
+
+</xsl:stylesheet>
+
+<!--*****************************************************************
+     TEMPLATE-MATCHING AMBIGUITY
+     Make Book templates equally specific
+******************************************************************-->
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="xml" indent="yes" omit-xml-declaration="yes" />
+
+<xsl:template match="Book[@Price &lt; 90]">
+   <xsl:copy-of select="." />
+</xsl:template>
+
+<xsl:template match="Book[Title]" />
+
+<xsl:template match="Magazine">
+   <xsl:copy-of select="." />
+</xsl:template>
+
+</xsl:stylesheet>
+
+<!--*****************************************************************
+     COPY ENTIRE DOCUMENT
+     Easy way (can equally replace "/" with "Bookstore"
+	 
+	 / means the root element, this means copy the entire database
+******************************************************************-->
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="xml" indent="yes" omit-xml-declaration="yes" />
+
+<xsl:template match="/">
+   <xsl:copy-of select="." />
+</xsl:template>
+
+</xsl:stylesheet>
+
+<!--*****************************************************************
+     COPY ENTIRE DOCUMENT
+     Hard way - recursive APPLY-TEMPLATES
+	 
+	 means match any element tag, any attribute, any text leaf of the XML, that is match anything
+	 
+	 idea that we match any type of element in our XML element, attribute or text, and
+	 we copy that object, and then we apply the templates to all of its sub-element recursively,
+	 again copying them
+******************************************************************-->
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="xml" indent="yes" omit-xml-declaration="yes" />
+
+<xsl:template match="*|@*|text()">
+   <xsl:copy>
+      <xsl:apply-templates select="*|@*|text()" />
+   </xsl:copy>
+</xsl:template>
+
+</xsl:stylesheet>
+
+<!--*****************************************************************
+     SELECTIVE TRANSFORMATIONS
+     Copy document but transform all attributes to subelements,
+     author name subelements to attributes
+******************************************************************-->
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="xml" indent="yes" omit-xml-declaration="yes" />
+
+<xsl:template match="*|@*|text()">
+   <xsl:copy>
+      <xsl:apply-templates select="*|@*|text()" />
+   </xsl:copy>
+</xsl:template>
+
+<xsl:template match="@ISBN">
+   <ISBN><xsl:value-of select="." /></ISBN>
+</xsl:template>
+
+<xsl:template match="@Price">
+   <Price><xsl:value-of select="." /></Price>
+</xsl:template>
+
+<xsl:template match="@Edition">
+   <Edition><xsl:value-of select="." /></Edition>
+</xsl:template>
+
+<xsl:template match="@Month">
+   <Month><xsl:value-of select="." /></Month>
+</xsl:template>
+
+<xsl:template match="@Year">
+   <Year><xsl:value-of select="." /></Year>
+</xsl:template>
+
+<xsl:template match="Author">
+  <Author LN="{Last_Name}" FN="{First_Name}" />
+</xsl:template>
+
+</xsl:stylesheet>
+
+<!--*****************************************************************
+     Remove first template in above to show need for recursive
+     APPLY-TEMPLATES
+******************************************************************-->
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="xml" indent="yes" omit-xml-declaration="yes" />
+
+<xsl:template match="@ISBN">
+   <ISBN><xsl:value-of select="." /></ISBN>
+</xsl:template>
+
+<xsl:template match="@Price">
+   <Price><xsl:value-of select="." /></Price>
+</xsl:template>
+
+<xsl:template match="@Edition">
+   <Edition><xsl:value-of select="." /></Edition>
+</xsl:template>
+
+<xsl:template match="@Month">
+   <Month><xsl:value-of select="." /></Month>
+</xsl:template>
+
+<xsl:template match="@Year">
+   <Year><xsl:value-of select="." /></Year>
+</xsl:template>
+
+<xsl:template match="Author">
+  <Author LN="{Last_Name}" FN="{First_Name}" />
+</xsl:template>
+
+</xsl:stylesheet>
+
+<!--*****************************************************************
+     ITERATION, SORT, CONDITIONAL, TRANSFORMATION TO HTML
+     Table of books costing less than $90, sorted by price
+	 
+	 transform it to HTML
+	 I guess, <th> means the name of column, <tr> means row, <td> means value in that row
+******************************************************************-->
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html" indent="yes" />
+
+<xsl:template match="/">
+   <html>
+   <table border="1">
+      <th>Book</th>
+      <th>Cost</th>
+      <xsl:for-each select="Bookstore/Book">
+      <xsl:sort select="@Price" />
+         <xsl:if test="@Price &lt; 90">
+            <tr>
+            <td><i><xsl:value-of select="Title" /></i></td>
+            <td><xsl:value-of select="@Price" /></td>
+            </tr>
+         </xsl:if>
+      </xsl:for-each>
+   </table>
+   </html>
+</xsl:template>
+
+</xsl:stylesheet>
+
+<!--*****************************************************************
+     Expunge 'Jennifer', change 'Widom' to 'Ms. Widom'
+	 
+	 you might wondering why we did not just write a condition that said first name 
+	 equals Jennifer. The problem is, to write that condition, the current element would
+	 be the parent, and we do not want to remove the parent, we want to remove the
+	 first name itself
+******************************************************************-->
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="xml" indent="yes" omit-xml-declaration="yes" />
+
+<xsl:template match="*|@*|text()">
+   <xsl:copy>
+      <xsl:apply-templates select="*|@*|text()" />
+   </xsl:copy>
+</xsl:template>
+
+<xsl:template match="First_Name[data(.) = 'Jennifer']">
+</xsl:template>
+
+<xsl:template match="Last_Name[data(.) = 'Widom']">
+  <Name>Ms. Widom</Name>
+</xsl:template>
+
+</xsl:stylesheet>
+
+<!--*****************************************************************
+     Alternate version of above
+	 examples are equivalent only when all Jennifer's and all Widom's are Jennifer Widom
+******************************************************************-->
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="xml" indent="yes" omit-xml-declaration="yes" />
+
+<xsl:template match="*|@*|text()">
+   <xsl:copy>
+      <xsl:apply-templates select="*|@*|text()" />
+   </xsl:copy>
+</xsl:template>
+
+<xsl:template match="Author[First_Name[data(.) = 'Jennifer']]">
+  <Author>
+    <Name>Ms. Widom</Name>
+  </Author>
+</xsl:template>
+
+</xsl:stylesheet>
